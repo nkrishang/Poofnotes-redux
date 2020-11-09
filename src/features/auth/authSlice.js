@@ -1,63 +1,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import userbase from 'userbase-js'
 
-const initialState = {
-
-    user: null,
-    status: 'idle',
-    error: null
-}
-
 // Async logic
 
-export const userInit = createAsyncThunk('auth/init', () => {
 
-    const appId = process.env.REACT_APP_APP_ID
-    const payload = {}
-
-    userbase.init({appId})
-    .then((session) => {
-      payload.user = session.user;
-        
-      // Handle loading state    
-    })
-
-    return payload
-})
-
-export const userLogin = createAsyncThunk('auth/userLogin', (userInfo) => {
+export const userLogin = createAsyncThunk('auth/userLogin', async (userInfo) => {
 
     const {username, password} = userInfo;
+    console.log("login async think initiated")
 
-    let payload = {};
+    let payload = {user: null, error: null};
 
-    userbase.signIn({username, password})
-    .then((user) => {
-        payload.user = user;    
-    })
-    .catch((error) => {
+    try {
+        const user = await userbase.signIn({username, password});
+        
+        if(user) payload.user = user;
+
+    } catch (error) {
         console.log(error);
-        payload.error = error;
-    })
+        payload.error = JSON.stringify(error);
+    }
 
     return payload
 
 })
 
-export const userSignup = createAsyncThunk('auth/userSignup', (userInfo) => {
+export const userSignup = createAsyncThunk('auth/userSignup', async (userInfo) => {
 
     const {username, password, email} = userInfo;
 
-    let payload = {};
+    let payload = {user: null, error: null};
 
-    userbase.signUp({username, password, email})
-    .then((user) => {
-        payload.user = user;    
-    })
-    .catch((error) => {
+    try {
+        const user = await userbase.signUp({username, password, email});
+        payload.user = user;
+
+    } catch (error) {
         console.log(error);
-        payload.error = error;
-    })
+        payload.error = JSON.stringify(error);
+    }
 
     return payload
 
@@ -75,44 +56,63 @@ export const userLogout = createAsyncThunk('auth/userLogout', () => {
 
 // Slice
 
+const initialState = {
+
+    user: null,
+    status: 'idle',
+    error: null
+}
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+
+        userInit(state, action) {
+            const user = action.payload;
+
+            console.log("user init initiated")
+
+            if(!user) return
+
+            state.user = user;
+            state.status = "succeeded"
+        }
+    },
 
     extraReducers: {
 
-        [userInit.pending]: (state, action) => {
-            state.status = 'pending';
-        },
-
-        [userInit.fulfilled]: (state, action) => {
-            const { user } = action.payload;
-            state.user = user;
-
-            state.status = 'succeeded';
-        },
-
         [userLogin.fulfilled]: (state, action) => {
             const {user, error} = action.payload;
+            console.log("Login extraReducer initiated")
 
-            if (user) state.user = user;
-            if (error) state.user = error;
+            if(user) state.user = user;
+            state.error = error;
+
+            state.status = 'succeeded'
+
+            console.log(action.payload)
+
         },
 
         [userSignup.fulfilled]: (state, action) => {
             const {user, error} = action.payload;
+            
+            if(user) state.user = user;
+            state.error = error;
+            state.status = 'succeeded'
 
-            if (user) state.user = user;
-            if (error) state.user = error;
         },
 
         [userLogout.fulfilled]: (state, action) => {
             state.user = null;
+            state.status = 'idle'
         }
     }
 
     
 })
+
+export const { userInit } = authSlice.actions;
 
 export default authSlice.reducer; 

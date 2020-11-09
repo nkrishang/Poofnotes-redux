@@ -1,18 +1,21 @@
 import React from 'react';
 
-import '../App.css';
-import '../output.css'
+import '../../App.css';
+import '../../output.css'
 
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
-function Login() {
+import { userLogin, userSignup } from './authSlice';
+import useLocalStorage from '../../utils/localstorage'
+
+function Auth({handleSession}) {
 
   // Locally managed state
 
-  const [authType, setAuthType] = React.useState('signup')
+  const [authType, setAuthType] = useLocalStorage('auth type', 'signup')
 
-  const [userInfo, setUserInfo] = React.useState({
+  const [userInfo, setUserInfo] = useLocalStorage("user info", {
       username: '',
       password: '',
       email: ''
@@ -54,16 +57,30 @@ function Login() {
   // Redux
   
   const dispatch = useDispatch();
+  let history = useHistory();
 
   const handleSubmit = e => {
     e.preventDefault();
+
+    console.log("Login event handler initiated.")
 
     if(authType === 'login') {
       dispatch(userLogin(userInfo))
     } else {
       dispatch(userSignup(userInfo))
+      console.log("Signup event");
     }
 
+    handleSession(true);
+
+    // React router navigation
+
+    setTimeout(() => {
+      console.log("Timeout working");
+      // history.replace("/")
+
+      history.replace("/")
+    }, 1000)
   }
 
   return (
@@ -94,13 +111,11 @@ function Login() {
           
           <div className="flex items-center justify-between">
 
-            <Link to="/">
-              <button className=" bg-transparent hover:bg-gray-800 text-gray-600 font-semibold hover:text-white py-2 px-4 border border-gray-600 hover:border-transparent rounded" type="submit">
+            <button className=" bg-transparent hover:bg-gray-800 text-gray-600 font-semibold hover:text-white py-2 px-4 border border-gray-600 hover:border-transparent rounded" type="submit">
                 {authType === 'login' ? "Log in" : "Sign Up"}
-              </button>
-            </Link>
+            </button>
 
-            <button type="button" className="inline-block align-baseline text-sm text-gray-600 hover:text-blue-800" onClick={handlePasswordRecovery}>
+            <button type="button" className="inline-block align-baseline text-sm text-gray-600 hover:text-blue-800">
               Forgot Password?
             </button>
             
@@ -118,4 +133,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Auth;
