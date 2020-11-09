@@ -71,7 +71,10 @@ function Auth({handleSession}) {
       console.log("Signup event");
     }
 
-    handleSession(true);
+    handleSession({
+      active: true,
+      username
+    });
 
     // React router navigation
 
@@ -79,7 +82,7 @@ function Auth({handleSession}) {
       console.log("Timeout working");
       // history.replace("/")
 
-      history.replace("/")
+      history.replace(`/${username}`)
     }, 1000)
   }
 
