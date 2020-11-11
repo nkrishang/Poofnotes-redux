@@ -54,7 +54,7 @@ function Auth({handleSession}) {
       }
   }
 
-  // Redux
+  // Redux + router logic
   
   const dispatch = useDispatch();
   let history = useHistory();
@@ -80,14 +80,17 @@ function Auth({handleSession}) {
 
     setTimeout(() => {
       console.log("Timeout working");
-      // history.replace("/")
-
       history.replace(`/${username}`)
     }, 1000)
   }
 
   return (
-    <div className="Login">
+    <div className="Login my-10">
+
+      <div className="m-auto text-center">
+        <h1 className="font-mono text-4xl text-gray-900 font-black">Poof Notes</h1>
+        <h3 className="font-serif text-lg text-gray-600">Make simple, tweet sized, shareable notes.</h3>
+      </div>
 
       <div className="w-full max-w-xs mx-auto my-4" >
         <form className="bg-white shadow-xl rounded px-8 pt-6 pb-8 mb-4" onSubmit={handleSubmit}>

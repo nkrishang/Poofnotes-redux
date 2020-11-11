@@ -6,9 +6,6 @@ import store from './app/store';
 import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
 
-import { userInit } from './features/auth/authSlice';
-
-
 const render = () => {
 
   ReactDOM.render(

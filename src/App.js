@@ -82,7 +82,7 @@ function App() {
         {/*If user is not logged in or is new, redirect to this path*/}
         <Route exact path="/auth">
 
-          <Auth handleSession={newSession => setSession(newSession)} />
+          {session.active ? <Redirect to={`/${session.username}`}/> : <Auth handleSession={newSession => setSession(newSession)} />}
 
         </Route>
 
@@ -93,7 +93,7 @@ function App() {
         </PrivateRoute>
 
         <Route exact path="/:random">
-        {session.active ? <Redirect to={`/${session.username}`}/> : <Redirect to="/auth"/>}
+          {session.active ? <Redirect to={`/${session.username}`}/> : <Redirect to="/auth"/>}
         </Route>
 
       </Switch>
