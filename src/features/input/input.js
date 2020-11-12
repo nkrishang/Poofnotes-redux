@@ -7,22 +7,18 @@ import { Collapse } from '@material-ui/core';
 import attachLogo from '../../assets/paperclip.svg';
 import micLogo from '../../assets/mic.svg';
 
-import { useDispatch } from 'react-redux'
-import { uploadNote, setStyle, setContent } from './inputSlice';
-
 import useLocalStorageState from "../../utils/localstorage";
 
 import io from 'socket.io-client';
 import RecordRTC, { StereoAudioRecorder } from 'recordrtc';
 import ss from 'socket.io-stream';
 
+import userbase from 'userbase-js';
+import sha256 from 'js-sha256';
+
 require('dotenv').config()
 
 function NoteInput() {
-
-    // Redux assignments
-
-    const dispatch = useDispatch()
 
     // Locally managed state (except for Speech To Text objects)
 
@@ -30,10 +26,12 @@ function NoteInput() {
 
         title: '',
         noteText: '',
+        noteStyle: 'rounded-lg shadow-lg bg-indigo-200',
         color: "indigo"
 
     })
-    const {noteText, title, color} = noteState;
+
+    const { noteText, title, color } = noteState;
 
     const [file, setFile] = React.useState(null);
 
@@ -68,8 +66,12 @@ function NoteInput() {
 
     const handleTranscription = newText => {
 
-        const preAudioText = noteText ? noteText + ' ' : '';
-        setNoteState({...noteState, noteText: (preAudioText + newText)});
+        setNoteState((noteState) => {
+            const prevText = noteState.noteText;
+            const preAudioText = prevText ? prevText + ' ' : '';
+            const newState = {...noteState, noteText: (preAudioText + newText)};
+            return newState;
+        })
     }
 
     const noteStyle = color => {
@@ -79,9 +81,9 @@ function NoteInput() {
     const handleStyle = event => {
 
         const selectedColor = event.target.getAttribute("name")
-        setNoteState({...noteState, color: selectedColor})
-        dispatch( setStyle( noteStyle(selectedColor)) );
+        const style = {noteStyle: noteStyle(selectedColor), color: selectedColor};
 
+        setNoteState({...noteState, ...style})
     }
 
     const handleFiles = event => {
@@ -96,11 +98,39 @@ function NoteInput() {
             stopRecording();
         }
 
-        dispatch( setContent(noteState) );
-        dispatch( uploadNote({noteState, file}) );
+        let item;
 
-        setNoteState({title: '', noteText: '', color: 'indigo'})
-        setFile(null);
+        if(!title) {
+            item = {...noteState, file, title: "New note"};
+        } else {
+            item = {...noteState, file};
+        }
+
+        const itemId = sha256((title.concat(noteText)).concat(Math.random().toString().substring(2))).toString();
+
+        userbase.insertItem({databaseName: "notes", item: item, itemId: itemId})
+        .then(() => {
+            
+            console.log("insert item working")
+
+            if(file) {
+                userbase.uploadFile({databaseName: "notes", itemId: itemId, file: file})
+                .then(() => {
+                    setFile(null);
+                    console.log("file successfully uploaded");
+                })
+                .catch((e) => {
+                alert("Sorry, there was an error when uploading your file. Please try again.")
+                console.log(e);
+                })
+            }
+            setNoteState({title: '', noteText: '', noteStyle: 'rounded-lg shadow-lg bg-indigo-200', color: 'indigo'})
+        })
+        .catch((e) => {
+            alert("Sorry, there was an error when making your note. Please try again.")
+            console.log(e)
+        })
+        
     }
 
     
@@ -120,8 +150,14 @@ function NoteInput() {
 
         const socketio = (
             window.location.hostname === "localhost"
-                ? io("http://localhost:8080")
-                : io(process.env.REACT_APP_SERVER)
+                ? io("http://localhost:8080", {
+                    withCredentials: false
+                    // Handle security
+                })
+                : io(process.env.REACT_APP_SERVER, {
+                    withCredentials: false
+                    // Handle security
+                })
         )
         
         const socket = socketio.on('connect', () => {

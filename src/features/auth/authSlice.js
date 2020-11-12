@@ -7,7 +7,7 @@ import userbase from 'userbase-js'
 export const userLogin = createAsyncThunk('auth/userLogin', async (userInfo) => {
 
     const {username, password} = userInfo;
-    console.log("login async think initiated")
+    // console.log("login async think initiated")
 
     let payload = {user: null, error: null};
 
@@ -84,14 +84,14 @@ const authSlice = createSlice({
 
         [userLogin.fulfilled]: (state, action) => {
             const {user, error} = action.payload;
-            console.log("Login extraReducer initiated")
+            // console.log("Login extraReducer initiated")
 
             if(user) state.user = user;
             state.error = error;
 
             state.status = 'succeeded'
 
-            console.log(action.payload)
+            // console.log(action.payload)
 
         },
 

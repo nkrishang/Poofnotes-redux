@@ -9,6 +9,7 @@ import '../App.css';
 import '../output.css'
 
 import NoteInput from '../features/input/input';
+import Grid from '../features/grid/grid';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -49,16 +50,21 @@ function Dashboard({ handleSession }) {
                 <h3 className="font-serif text-lg text-gray-600">Make simple, tweet sized, shareable notes.</h3>
             </div>
 
-            <div className="flex justify-center">
+            <div className="">
                 {user ?
 
                 <>
-                    <NoteInput />
+                    <div className="flex justify-center">
+                        <NoteInput />
+                    </div>
+                    
+                    <Grid />
                 </>
 
                 :
-
-                <CircularProgress className="my-4"/>
+                    <div className="flex justify-center">
+                        <CircularProgress className="my-4"/>
+                    </div>
 
                 }
             </div>

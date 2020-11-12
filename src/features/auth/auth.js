@@ -62,7 +62,7 @@ function Auth({handleSession}) {
   const handleSubmit = e => {
     e.preventDefault();
 
-    console.log("Login event handler initiated.")
+    // console.log("Login event handler initiated.")
 
     if(authType === 'login') {
       dispatch(userLogin(userInfo))
@@ -79,7 +79,7 @@ function Auth({handleSession}) {
     // React router navigation
 
     setTimeout(() => {
-      console.log("Timeout working");
+      // console.log("Timeout working");
       history.replace(`/${username}`)
     }, 1000)
   }
