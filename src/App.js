@@ -92,7 +92,7 @@ function App() {
           <Dashboard handleSession={newSession => setSession(newSession)} />
         </PrivateRoute>
 
-        <Route exact path="/:random">
+        <Route path="/*">
           {session.active ? <Redirect to={`/${session.username}`}/> : <Redirect to="/auth"/>}
         </Route>
 
