@@ -93,7 +93,8 @@ function App() {
         </PrivateRoute>
 
         <Route path="/*">
-          {session.active ? <Redirect to={`/${session.username}`}/> : <Redirect to="/auth"/>}
+          {/* {session.active ? <Redirect to={`/${session.username}`}/> : <Redirect to="/auth"/>} */}
+          <Redirect to="/"/>
         </Route>
 
       </Switch>
